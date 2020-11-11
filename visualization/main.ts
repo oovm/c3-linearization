@@ -1,3 +1,5 @@
+// https://github.com/federicobond/c3-linearization
+
 const defaultOptions = {
     reverse: false,
     python: false
@@ -52,7 +54,7 @@ function _linearize(graph: Record<string, string[]>, head: string, results, visi
     }
 
     if (visiting.has(head)) {
-        throw new Error('circular dependency found');
+        throw new Error('Circular dependency found');
     }
     visiting.add(head);
 
