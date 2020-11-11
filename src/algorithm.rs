@@ -2,11 +2,16 @@ use crate::{
     errors::Error::{BadHead, Circular, NotFound},
     Result, C3,
 };
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    hash::Hash,
+};
 
-pub fn merge(sequences: Vec<Vec<String>>) -> Result<Vec<String>> {
+pub fn merge<T>(sequences: Vec<Vec<T>>) -> Result<Vec<T>>
+where
+    T: Clone + PartialEq,
+{
     let mut result = vec![];
-    // let mut sequences = sequences.iter().map(|s| s.slice()).collect::<Vec<_>>();
     let sequences = &mut sequences.clone();
     while sequences.len() > 0 {
         let mut found = false;
@@ -38,7 +43,10 @@ pub fn merge(sequences: Vec<Vec<String>>) -> Result<Vec<String>> {
 }
 
 impl C3 {
-    pub fn linearize(&self, graph: HashMap<String, Vec<String>>) -> Result<HashMap<String, Vec<String>>> {
+    pub fn linearize<T>(&self, graph: HashMap<T, Vec<T>>) -> Result<HashMap<T, Vec<T>>>
+    where
+        T: Clone + PartialEq + Eq + Hash,
+    {
         let heads: Vec<_> = graph.keys().collect();
         let results = &mut HashMap::new();
         let visiting = &mut HashSet::new();
@@ -48,16 +56,18 @@ impl C3 {
         return Ok(results.clone());
     }
 
-    fn solve(
+    fn solve<T>(
         &self,
-        graph: &HashMap<String, Vec<String>>,
-        head: &String,
-        results: &mut HashMap<String, Vec<String>>,
-        visiting: &mut HashSet<String>,
-    ) -> Result<Vec<String>> {
-        match results.get(head) {
-            None => (),
-            Some(s) => return Ok(s.clone()),
+        graph: &HashMap<T, Vec<T>>,
+        head: &T,
+        results: &mut HashMap<T, Vec<T>>,
+        visiting: &mut HashSet<T>,
+    ) -> Result<Vec<T>>
+    where
+        T: Clone + PartialEq + Eq + Hash,
+    {
+        if let Some(s) = results.get(head) {
+            return Ok(s.clone());
         }
         if visiting.contains(head) {
             return Err(Circular);

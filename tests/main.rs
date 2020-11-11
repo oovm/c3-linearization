@@ -1,5 +1,5 @@
+use c3_linearization::{merge, C3};
 use std::collections::HashMap;
-use sub_projects::{merge, C3};
 
 #[test]
 fn ready() {
@@ -8,16 +8,21 @@ fn ready() {
 
 #[test]
 fn test() {
-    println!("{:#?}", merge(vec![vec!["B".to_string()], vec!["C".to_string(), "D".to_string()]]))
+    println!("{:#?}", merge(vec![vec!["B"], vec!["C", "D"]]))
 }
 
 #[test]
-fn test2() {
+fn basic() {
     let c3 = C3::default();
-    let mut h = HashMap::new();
-    h.insert(String::from("A"), vec![String::from("B"), String::from("C")]);
-    h.insert(String::from("B"), vec![]);
-    h.insert(String::from("C"), vec![String::from("D")]);
-    h.insert(String::from("D"), vec![]);
-    println!("{:#?}", c3.linearize(h))
+    let mut input = HashMap::new();
+    input.insert('A', vec!['B', 'C']);
+    input.insert('B', vec![]);
+    input.insert('C', vec!['D']);
+    input.insert('D', vec![]);
+    let mut target = HashMap::new();
+    target.insert('A', vec!['A', 'B', 'C', 'D']);
+    target.insert('B', vec!['B']);
+    target.insert('C', vec!['C', 'D']);
+    target.insert('D', vec!['D']);
+    assert_eq!(target, c3.linearize(input).unwrap())
 }
