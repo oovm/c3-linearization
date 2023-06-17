@@ -2,7 +2,7 @@ mod algorithm;
 
 use crate::{
     errors::LinearizeError::{BadHead, Circular, NotFound},
-    C3Object, Result,
+    C3Object, LinearizeResult,
 };
 use std::{
     collections::{BTreeMap, HashMap, HashSet},

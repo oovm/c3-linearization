@@ -1,14 +1,10 @@
-use c3_linearization::{merge, C3};
-use std::collections::HashMap;
+mod merged;
+use c3_linearization::C3;
+use std::collections::{HashMap, HashSet};
 
 #[test]
 fn ready() {
     println!("it works!")
-}
-
-#[test]
-fn test() {
-    println!("{:#?}", merge(vec![vec!["B"], vec!["C", "D"]]))
 }
 
 #[test]

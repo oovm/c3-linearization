@@ -2,12 +2,12 @@ use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug, Clone)]
 pub enum LinearizeError {
-    NotFound,
+    NotFound { base: String },
     BadHead { base: String, this: String },
-    Circular,
+    Circular { circular: Vec<String> },
 }
 
-pub type Result<T> = std::result::Result<T, LinearizeError>;
+pub type LinearizeResult<T> = std::result::Result<T, LinearizeError>;
 
 impl Display for LinearizeError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

@@ -1,5 +1,5 @@
 use c3_inheritance::{C3Object, InheritGraph};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[test]
 fn ready() {

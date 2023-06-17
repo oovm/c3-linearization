@@ -10,6 +10,6 @@ mod traits;
 
 pub use crate::{
     c3::InheritGraph,
-    errors::{LinearizeError, Result},
+    errors::{LinearizeError, LinearizeResult},
     traits::C3Object,
 };
