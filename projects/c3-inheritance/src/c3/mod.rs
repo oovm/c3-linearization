@@ -9,13 +9,12 @@ mod algorithm;
 
 #[derive(Copy, Clone, Debug)]
 pub struct C3 {
-    reverse: bool,
     python: bool,
 }
 
 impl Default for C3 {
     fn default() -> Self {
-        Self { reverse: false, python: false }
+        Self { python: false }
     }
 }
 

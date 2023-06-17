@@ -41,9 +41,9 @@ pub fn merge(mut sequences: Vec<Vec<&str>>) -> Result<Vec<&str>> {
 
 impl InheritGraph {
     pub fn linearize(&self) -> Result<HashMap<&str, Vec<&str>>> {
-        C3 { reverse: false, python: false }.linearize(self.as_map())
+        C3 { python: true }.linearize(self.as_map())
     }
-    pub fn as_map(&self) -> HashMap<&str, Vec<&str>> {
+    fn as_map(&self) -> HashMap<&str, Vec<&str>> {
         let mut map = HashMap::new();
         for (name, class) in self.base.iter() {
             let mut base = vec![];
@@ -86,9 +86,6 @@ impl C3 {
             let res = vec![head];
             results.insert(head, res.clone());
             return Ok(res);
-        }
-        if self.reverse {
-            parents.reverse();
         }
         let mut sequences = vec![];
         for x in parents.iter() {
