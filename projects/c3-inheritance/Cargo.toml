@@ -1,13 +1,14 @@
 [package]
-name = "c3-linearization"
-version = "0.1.0"
+name = "c3-inheritance"
+version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "C3 linearization"
+description = "..."
 repository = "https://github.com/oovm/c3-linearization"
-documentation = "https://docs.rs/c3-linearization"
-readme = "readme.md"
+documentation = "https://docs.rs/c3-inheritance"
+readme = "Readme.md"
 license = "MPL-2.0"
 edition = "2021"
+exclude = ["package.json", "tests/**"]
 
 [dependencies]
 
