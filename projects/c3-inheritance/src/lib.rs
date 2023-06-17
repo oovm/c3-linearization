@@ -6,6 +6,9 @@
 
 mod errors;
 mod c3;
+mod traits;
 
 
-pub use crate::errors::{Error, Result};
+pub use crate::errors::{LinearizeError, Result};
+pub use crate::c3::{C3, C3Class};
+pub use crate::traits::C3Object;
