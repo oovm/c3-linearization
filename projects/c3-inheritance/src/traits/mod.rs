@@ -1,6 +1,8 @@
 use crate::c3::C3Class;
 
+/// A trait for objects that can be used in the C3 algorithm.
 pub trait C3Object {
+    /// Convert the object to a class.
     fn as_class(&self) -> C3Class;
 }
 

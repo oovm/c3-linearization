@@ -29,7 +29,7 @@ fn bad_head() {
 #[test]
 fn basic() {
     let mut c3 = InheritGraph::default();
-    c3 += "object";
+    c3 += "object".as_class().with_inherit("Z");
     c3 += "A".as_class().with_inherit("object");
     c3 += "B".as_class().with_inherit("object");
     c3 += "C".as_class().with_inherit("object");
@@ -39,5 +39,5 @@ fn basic() {
     c3 += "K2".as_class().with_inherit("D").with_inherit("B").with_inherit("E");
     c3 += "K3".as_class().with_inherit("D").with_inherit("A");
     c3 += "Z".as_class().with_inherit("K1").with_inherit("K2").with_inherit("K3");
-    println!("{:#?}", c3.linearize())
+    println!("{:#?}", c3.linearize().unwrap())
 }
