@@ -1,28 +1,28 @@
-use crate::{errors::LinearizeError::{BadHead, Circular, NotFound}, Result, C3, ClassStorage};
+use crate::{
+    c3::C3,
+    errors::LinearizeError::{BadHead, Circular, NotFound},
+    InheritGraph, Result,
+};
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
 };
 
-pub fn merge<T>(sequences: Vec<Vec<T>>) -> Result<Vec<T>>
-    where
-        T: Clone + PartialEq,
-{
+pub fn merge(mut sequences: Vec<Vec<&str>>) -> Result<Vec<&str>> {
     let mut result = vec![];
-    let sequences = &mut sequences.clone();
     while sequences.len() > 0 {
         let mut found = false;
-        for seq in sequences.clone() {
+        for seq in &sequences {
             // println!("{:?}", seq);
-            let head = seq[0].clone();
+            let head = seq[0];
             // check bad head
-            for s in sequences.clone() {
+            for s in &sequences {
                 if s != seq && s[1..s.len()].contains(&head) {
                     return Err(BadHead);
                 }
             }
             found = true;
-            result.push(head.clone());
+            result.push(head);
             for seq in sequences.iter_mut() {
                 if let Some(index) = seq.iter().position(|r| r == &head) {
                     seq.remove(index);
@@ -39,98 +39,52 @@ pub fn merge<T>(sequences: Vec<Vec<T>>) -> Result<Vec<T>>
     return Ok(result);
 }
 
-
-impl ClassStorage {
-    pub fn linearize(&self) -> Result<HashMap<T, Vec<T>>>
-        where
-            T: Clone + PartialEq + Eq + Hash,
-    {
-        let heads: Vec<_> = graph.keys().collect();
-        let results = &mut HashMap::new();
-        let visiting = &mut HashSet::new();
-        for head in heads {
-            self.solve(&graph, head, results, visiting)?;
-        }
-        return Ok(results.clone());
+impl InheritGraph {
+    pub fn linearize(&self) -> Result<HashMap<&str, Vec<&str>>> {
+        C3 { reverse: false, python: false }.linearize(self.as_map())
     }
-
-    fn solve<T>(
-        &self,
-        graph: &HashMap<T, Vec<T>>,
-        head: &T,
-        results: &mut HashMap<T, Vec<T>>,
-        visiting: &mut HashSet<T>,
-    ) -> Result<Vec<T>>
-        where
-            T: Clone + PartialEq + Eq + Hash,
-    {
-        if let Some(s) = results.get(head) {
-            return Ok(s.clone());
+    pub fn as_map(&self) -> HashMap<&str, Vec<&str>> {
+        let mut map = HashMap::new();
+        for (name, class) in self.base.iter() {
+            let mut base = vec![];
+            for subs in class.base.iter() {
+                base.push(subs.class.as_str());
+            }
+            map.insert(name.as_str(), base);
         }
-        if visiting.contains(head) {
-            return Err(Circular);
-        }
-        visiting.insert(head.clone());
-        let mut parents = graph[head].clone();
-        if parents.len() == 0 {
-            let res = vec![head.clone()];
-            results.insert(head.clone(), res.clone());
-            return Ok(res);
-        }
-        if self.reverse {
-            parents.reverse();
-        }
-        let mut sequences = vec![];
-        for x in parents.iter() {
-            let s = self.solve(graph, &x, results, visiting)?;
-            sequences.push(s)
-        }
-        if self.python {
-            sequences.extend(vec![parents])
-        }
-        let mut res = vec![head.clone()];
-        res.extend(merge(sequences)?);
-        results.insert(head.clone(), res.clone());
-        visiting.remove(head);
-        return Ok(res);
+        return map;
     }
 }
 
 impl C3 {
-    pub fn linearize<T>(&self, graph: HashMap<T, Vec<T>>) -> Result<HashMap<T, Vec<T>>>
-        where
-            T: Clone + PartialEq + Eq + Hash,
-    {
+    pub fn linearize<'a>(&self, graph: HashMap<&'a str, Vec<&'a str>>) -> Result<HashMap<&'a str, Vec<&'a str>>> {
         let heads: Vec<_> = graph.keys().collect();
-        let results = &mut HashMap::new();
-        let visiting = &mut HashSet::new();
+        let mut results = HashMap::new();
+        let mut visiting = HashSet::new();
         for head in heads {
-            self.solve(&graph, head, results, visiting)?;
+            self.solve(&graph, head, &mut results, &mut visiting)?;
         }
-        return Ok(results.clone());
+        return Ok(results);
     }
 
-    fn solve<T>(
+    fn solve<'a>(
         &self,
-        graph: &HashMap<T, Vec<T>>,
-        head: &T,
-        results: &mut HashMap<T, Vec<T>>,
-        visiting: &mut HashSet<T>,
-    ) -> Result<Vec<T>>
-        where
-            T: Clone + PartialEq + Eq + Hash,
-    {
+        graph: &HashMap<&'a str, Vec<&'a str>>,
+        head: &'a str,
+        results: &mut HashMap<&'a str, Vec<&'a str>>,
+        visiting: &mut HashSet<&'a str>,
+    ) -> Result<Vec<&'a str>> {
         if let Some(s) = results.get(head) {
             return Ok(s.clone());
         }
         if visiting.contains(head) {
             return Err(Circular);
         }
-        visiting.insert(head.clone());
+        visiting.insert(head);
         let mut parents = graph[head].clone();
         if parents.len() == 0 {
-            let res = vec![head.clone()];
-            results.insert(head.clone(), res.clone());
+            let res = vec![head];
+            results.insert(head, res.clone());
             return Ok(res);
         }
         if self.reverse {
@@ -146,7 +100,7 @@ impl C3 {
         }
         let mut res = vec![head.clone()];
         res.extend(merge(sequences)?);
-        results.insert(head.clone(), res.clone());
+        results.insert(head, res.clone());
         visiting.remove(head);
         return Ok(res);
     }

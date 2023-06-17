@@ -4,11 +4,12 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
-mod errors;
 mod c3;
+mod errors;
 mod traits;
 
-
-pub use crate::errors::{LinearizeError, Result};
-pub use crate::c3::{C3, ClassStorage};
-pub use crate::traits::C3Object;
+pub use crate::{
+    c3::InheritGraph,
+    errors::{LinearizeError, Result},
+    traits::C3Object,
+};

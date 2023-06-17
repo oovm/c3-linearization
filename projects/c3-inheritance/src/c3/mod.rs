@@ -1,7 +1,9 @@
-use std::collections::{BTreeMap, HashMap};
-use std::ops::{Add, AddAssign};
-use std::sync::Arc;
 use crate::C3Object;
+use std::{
+    collections::{BTreeMap, HashMap},
+    ops::{Add, AddAssign},
+    sync::Arc,
+};
 
 mod algorithm;
 
@@ -11,40 +13,73 @@ pub struct C3 {
     python: bool,
 }
 
-
 impl Default for C3 {
     fn default() -> Self {
         Self { reverse: false, python: false }
     }
 }
 
-
 #[derive(Clone, Debug, Default)]
-pub struct ClassStorage {
+pub struct InheritGraph {
     base: BTreeMap<String, C3Class>,
 }
 
-impl<T> AddAssign<T> for ClassStorage where T: C3Object {
+impl<T> AddAssign<T> for InheritGraph
+where
+    T: C3Object,
+{
     fn add_assign(&mut self, rhs: T) {
-        todo!()
+        let class = rhs.as_class();
+        self.base.insert(class.name.clone(), class);
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct C3Class {
     name: String,
-    base: Vec<(bool, String)>
+    base: Vec<VirtualInherit>,
 }
 
 impl C3Class {
-    pub fn new<T>(name: T) -> Self where T: Into<String> {
-        Self {
-            name: name.into(),
-            base: vec![]
-        }
+    pub fn new<T>(name: T) -> Self
+    where
+        T: Into<String>,
+    {
+        Self { name: name.into(), base: vec![] }
+    }
+    pub fn with_inherit<T>(mut self, name: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.base.push(VirtualInherit { class: name.into(), is_virtual: true });
+        self
+    }
+    pub fn with_virtual_inherit<T>(mut self, name: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.base.push(VirtualInherit { class: name.into(), is_virtual: true });
+        self
     }
 }
 
-pub struct C3ClassInherit {
+impl AddAssign<VirtualInherit> for C3Class {
+    fn add_assign(&mut self, rhs: VirtualInherit) {
+        self.base.push(rhs);
+    }
+}
+
+impl Add<VirtualInherit> for C3Class {
+    type Output = Self;
+
+    fn add(mut self, rhs: VirtualInherit) -> Self::Output {
+        self.base.push(rhs);
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct VirtualInherit {
     class: String,
     is_virtual: bool,
 }
@@ -52,4 +87,3 @@ pub struct C3ClassInherit {
 pub struct C3ClassMember {
     name: String,
 }
-
