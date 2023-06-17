@@ -1,73 +1,99 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    error::Error,
+};
 
-#[derive(Debug, Clone)]
-pub enum LinearizeError {
-    NotFound { base: String },
-    BadHead { base: String, this: String },
-    Circular { circular: Vec<String> },
-}
+pub fn c3_linearization<'a>(
+    classes: HashMap<&'a str, Vec<&'a str>>,
+) -> Result<BTreeMap<&'a str, Vec<&'a str>>, Box<dyn Error>> {
+    let mut results: BTreeMap<&'a str, Vec<&'a str>> = BTreeMap::new();
+    let mut visiting: HashMap<&'a str, bool> = HashMap::new();
 
-fn c3_linearization<'a>(classes: HashMap<&'a str, Vec<&'a str>>) -> Result<BTreeMap<&'a str, Vec<&'a str>>, LinearizeError> {
-    let mut linearized = BTreeMap::new();
-    let mut temporary = vec![];
-
-    for (base, parents) in classes {
-        temporary.push((base, parents));
+    for (head, _) in &classes {
+        _linearize(&classes, head, &mut results, &mut visiting)?;
     }
 
-    while !temporary.is_empty() {
+    Ok(results)
+}
+
+fn merge(sequences: Vec<Vec<&str>>) -> Result<Vec<&str>, &'static str> {
+    let mut result = Vec::new();
+    let mut sequences = sequences.into_iter().map(|s| s.into_iter().collect::<Vec<&str>>()).collect::<Vec<_>>();
+
+    while !sequences.is_empty() {
         let mut found = false;
+        let mut head: Option<&str> = None;
 
-        for i in 0..temporary.len() {
-            let (base, parents) = temporary[i].clone();
-            let mut found_head = true;
+        for seq in &sequences {
+            head = seq.first().cloned();
 
-            for parent in &parents {
-                let mut valid = true;
+            fn is_bad_head(seq: &&Vec<&str>, s: &&Vec<&str>) -> bool {
+                s != seq && s[1..].contains(&seq[0])
+            }
 
-                for remaining in &temporary[i + 1..] {
-                    if remaining.1.contains(parent) {
-                        valid = false;
-                        break;
+            if !sequences.iter().any(|s| is_bad_head(&seq, &s)) {
+                found = true;
+                if let Some(head) = head {
+                    result.push(head);
+
+                    for seq in &mut sequences {
+                        if let Some(index) = seq.iter().position(|&x| x == head) {
+                            seq.remove(index);
+                        }
                     }
-                }
 
-                if valid && !linearized.contains_key(parent) {
-                    found_head = false;
                     break;
                 }
             }
-
-            if found_head {
-                linearized.insert(base, parents.clone());
-                temporary.remove(i);
-                found = true;
-                break;
-            }
         }
 
+        sequences = sequences.into_iter().filter(|s| !s.is_empty()).collect::<Vec<_>>();
+
         if !found {
-            let circular = temporary.iter().map(|(base, _)| base.to_string()).collect();
-            return Err(LinearizeError::Circular { circular });
+            return Err("Cannot find C3-linearization for input".into());
         }
     }
 
-    Ok(linearized)
+    Ok(result)
 }
 
-#[test]
-fn main() {
-    let mut classes = HashMap::new();
-    classes.insert("O", vec![]);
-    classes.insert("A", vec!["O"]);
-    classes.insert("B", vec!["O"]);
-    classes.insert("C", vec!["O"]);
-    classes.insert("D", vec!["O"]);
-    classes.insert("E", vec!["O"]);
-    classes.insert("K1", vec!["A", "B", "C"]);
-    classes.insert("K2", vec!["D", "B", "E"]);
-    classes.insert("K3", vec!["D", "A"]);
-    classes.insert("Z", vec!["K1", "K2", "K3"]);
+fn _linearize<'a>(
+    graph: &HashMap<&'a str, Vec<&'a str>>,
+    head: &'a str,
+    results: &mut BTreeMap<&'a str, Vec<&'a str>>,
+    visiting: &mut HashMap<&'a str, bool>,
+) -> Result<Vec<&'a str>, Box<dyn Error>> {
+    if let Some(res) = results.get(head) {
+        return Ok(res.clone());
+    }
 
-    println!("{:#?}", c3_linearization(classes))
+    if visiting.contains_key(head) {
+        return Err("Circular dependency found".into());
+    }
+    visiting.insert(head, true);
+
+    let parents = graph.get(head).cloned().unwrap_or_else(Vec::new);
+
+    if parents.is_empty() {
+        let res = vec![head];
+        results.insert(head, res.clone());
+        return Ok(res);
+    }
+
+    let mut sequences = Vec::new();
+    for parent in parents {
+        let sequence = _linearize(graph, parent, results, visiting)?;
+        sequences.push(sequence);
+    }
+
+    if let Some(true) = graph.get(head).map(|p| p.is_empty()) {
+        sequences.push(vec![head]);
+    }
+
+    let res = vec![head].into_iter().chain(merge(sequences)?).collect::<Vec<_>>();
+    results.insert(head, res.clone());
+
+    visiting.remove(head);
+
+    Ok(res)
 }

@@ -42,3 +42,25 @@ fn basic2() {
 
     println!("{:#?}", c3.linearize(input).unwrap())
 }
+
+#[test]
+fn main() {
+    let classes: HashMap<&str, Vec<&str>> = [
+        ("O", vec![]),
+        ("A", vec!["O"]),
+        ("B", vec!["O"]),
+        ("C", vec!["O"]),
+        ("D", vec!["O"]),
+        ("E", vec!["O"]),
+        ("K1", vec!["A", "B", "C"]),
+        ("K2", vec!["D", "B", "E"]),
+        ("K3", vec!["D", "A"]),
+        ("Z", vec!["K1", "K2", "K3"]),
+    ]
+    .iter()
+    .cloned()
+    .collect();
+
+    let result = merged::c3_linearization(classes);
+    println!("{:#?}", result)
+}
