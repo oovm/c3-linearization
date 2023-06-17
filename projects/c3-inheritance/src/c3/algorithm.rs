@@ -1,35 +1,48 @@
 use super::*;
-use crate::LinearizeError;
+
+impl<'a> InheritLinearized<'a> {
+    fn new(graph: &'a InheritGraph) -> Self {
+        Self { graph, maps: BTreeMap::new() }
+    }
+    fn insert(&mut self, name: &'a str, value: Vec<&'a str>) {
+        self.maps.insert(name, value.to_vec());
+    }
+    /// Get the linearization for a class.
+    pub fn mro(&self, name: &str) -> Option<&[&'a str]> {
+        Some(self.maps.get(name)?.as_slice())
+    }
+    /// Check if A is a B
+    pub fn is_ancestor(&self, this: &str, ancestor: &str) -> Option<bool> {
+        Some(self.maps.get(this)?.contains(&parent))
+    }
+}
 
 impl InheritGraph {
     /// Linearize the inheritance graph.
-    pub fn linearize(&self) -> LinearizeResult<BTreeMap<&str, Vec<&str>>> {
-        c3_progress(self)
+    pub fn linearize(&self) -> LinearizeResult<InheritLinearized> {
+        let mut results = InheritLinearized::new(self);
+        for (head, _) in &self.base {
+            c3_linearize(self, head, &mut results, &mut BTreeMap::new())?;
+        }
+        Ok(results)
     }
     fn get_base(&self, name: &str) -> Option<&[VirtualInherit]> {
         Some(self.base.get(name)?.base.as_slice())
     }
-}
-
-fn c3_progress<'a>(classes: &'a InheritGraph) -> LinearizeResult<BTreeMap<&'a str, Vec<&'a str>>> {
-    let mut results: BTreeMap<&'a str, Vec<&'a str>> = BTreeMap::new();
-    let mut visiting: BTreeMap<&'a str, bool> = BTreeMap::new();
-
-    for (head, _) in &classes.base {
-        _linearize(classes, head, &mut results, &mut visiting)?;
+    /// Check if the graph has at least one base class.
+    pub fn has_base(&self, class: &str) -> Option<bool> {
+        Some(!self.base.get(class)?.base.is_empty())
     }
-
-    Ok(results)
 }
 
-fn _linearize<'a>(
+fn c3_linearize<'a>(
     graph: &'a InheritGraph,
     head: &'a str,
-    results: &mut BTreeMap<&'a str, Vec<&'a str>>,
+    results: &mut InheritLinearized<'a>,
     visiting: &mut BTreeMap<&'a str, bool>,
 ) -> LinearizeResult<Vec<&'a str>> {
-    if let Some(res) = results.get(head) {
-        return Ok(res.clone());
+    if let Some(res) = results.mro(head) {
+        return Ok(res.to_vec());
     }
     check_circle(head, visiting)?;
     visiting.insert(head, true);
@@ -44,11 +57,11 @@ fn _linearize<'a>(
 
     let mut sequences = Vec::new();
     for parent in parents {
-        let sequence = _linearize(graph, &parent.class, results, visiting)?;
+        let sequence = c3_linearize(graph, &parent.class, results, visiting)?;
         sequences.push(sequence);
     }
 
-    if let Some(true) = graph.get_base(head).map(|p| p.is_empty()) {
+    if let Some(false) = graph.has_base(head) {
         sequences.push(vec![head]);
     }
 
@@ -59,6 +72,7 @@ fn _linearize<'a>(
 
     Ok(res)
 }
+
 fn merge(sequences: Vec<Vec<&str>>) -> LinearizeResult<Vec<&str>> {
     let mut result = Vec::new();
     let mut sequences = sequences.into_iter().map(|s| s.into_iter().collect::<Vec<&str>>()).collect::<Vec<_>>();

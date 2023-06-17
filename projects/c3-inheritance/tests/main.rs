@@ -1,5 +1,4 @@
 use c3_inheritance::{C3Object, InheritGraph, LinearizeError};
-use std::collections::{HashMap, HashSet};
 
 #[test]
 fn ready() {
@@ -30,7 +29,7 @@ fn wiki_1() -> Result<(), LinearizeError> {
     c3 += "K3".as_class().with_inherit("D").with_inherit("A");
     c3 += "Z".as_class().with_inherit("K1").with_inherit("K2").with_inherit("K3");
     let out = c3.linearize()?;
-    let z = out.get("Z").unwrap().as_slice();
+    let z = out.mro("Z").unwrap();
     assert_eq!(z, &["Z", "K1", "K2", "K3", "D", "A", "B", "C", "E"]);
     Ok(())
 }
@@ -49,7 +48,8 @@ fn wiki_2() -> Result<(), LinearizeError> {
     c3 += "K3".as_class().with_inherit("A").with_inherit("D");
     c3 += "Z".as_class().with_inherit("K1").with_inherit("K3").with_inherit("K2");
     let out = c3.linearize()?;
-    let z = out.get("Z").unwrap().as_slice();
+    let z = out.mro("Z").unwrap();
     assert_eq!(z, &["Z", "K1", "C", "K3", "A", "K2", "B", "D", "E"]);
+    assert_eq!(Some(true), out.is_ancestor("Z", "E"));
     Ok(())
 }

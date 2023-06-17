@@ -3,6 +3,7 @@ use std::fmt::{self, Display, Formatter};
 /// A type alias for the result of a linearization.
 pub type LinearizeResult<T> = std::result::Result<T, LinearizeError>;
 
+/// A virtual inheritance.
 #[derive(Debug, Clone)]
 pub enum LinearizeError {
     /// The input class was not found in the graph.

@@ -1,20 +1,22 @@
 mod algorithm;
 
-use crate::{C3Object, LinearizeResult};
+use crate::{C3Object, LinearizeError, LinearizeResult};
 use std::{
     collections::BTreeMap,
+    fmt::Debug,
     ops::{Add, AddAssign},
 };
-
-#[derive(Copy, Clone, Debug)]
-pub struct C3Progress {
-    python: bool,
-}
 
 /// The inheritance graph.
 #[derive(Clone, Debug, Default)]
 pub struct InheritGraph {
     base: BTreeMap<String, C3Class>,
+}
+
+#[derive(Debug)]
+pub struct InheritLinearized<'a> {
+    graph: &'a InheritGraph,
+    maps: BTreeMap<&'a str, Vec<&'a str>>,
 }
 
 impl<T> AddAssign<T> for InheritGraph
@@ -27,6 +29,7 @@ where
     }
 }
 
+/// A class.
 #[derive(Clone, Debug)]
 pub struct C3Class {
     name: String,
@@ -34,12 +37,14 @@ pub struct C3Class {
 }
 
 impl C3Class {
+    /// Create a new class.
     pub fn new<T>(name: T) -> Self
     where
         T: Into<String>,
     {
         Self { name: name.into(), base: vec![] }
     }
+    /// Add a base class.
     pub fn with_inherit<T>(mut self, name: T) -> Self
     where
         T: Into<String>,
@@ -47,6 +52,7 @@ impl C3Class {
         self.base.push(VirtualInherit { class: name.into(), is_virtual: true });
         self
     }
+    /// Add a virtual base class.
     pub fn with_virtual_inherit<T>(mut self, name: T) -> Self
     where
         T: Into<String>,
@@ -76,7 +82,8 @@ pub struct VirtualInherit {
     class: String,
     is_virtual: bool,
 }
-
+/// A trait for objects that can be used in the C3 algorithm.
+#[derive(Clone, Debug)]
 pub struct C3ClassMember {
     name: String,
 }
