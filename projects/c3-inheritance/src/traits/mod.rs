@@ -1,5 +1,4 @@
-use crate::{c3::C3Class, InheritGraph};
-use std::sync::Arc;
+use crate::c3::C3Class;
 
 pub trait C3Object {
     fn as_class(&self) -> C3Class;

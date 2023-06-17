@@ -1,21 +1,18 @@
-use crate::C3Object;
+mod algorithm;
+
+use crate::{
+    errors::LinearizeError::{BadHead, Circular, NotFound},
+    C3Object, Result,
+};
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     ops::{Add, AddAssign},
     sync::Arc,
 };
 
-mod algorithm;
-
 #[derive(Copy, Clone, Debug)]
-pub struct C3 {
+pub struct C3Progress {
     python: bool,
-}
-
-impl Default for C3 {
-    fn default() -> Self {
-        Self { python: false }
-    }
 }
 
 #[derive(Clone, Debug, Default)]

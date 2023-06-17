@@ -26,3 +26,23 @@ fn basic() {
     target.insert('D', vec!['D']);
     assert_eq!(target, c3.linearize(input).unwrap())
 }
+
+// class A(object):pass
+// class B(object):pass
+// class C(object):pass
+// class E(A,B):pass
+// class F(B,C):pass
+// class G(E,F):pass
+#[test]
+fn basic2() {
+    let c3 = C3::default();
+    let mut input = HashMap::new();
+    input.insert('A', vec![]);
+    input.insert('B', vec![]);
+    input.insert('C', vec![]);
+    input.insert('E', vec!['A', 'B']);
+    input.insert('F', vec!['B', 'C']);
+    input.insert('G', vec!['E', 'F']);
+
+    println!("{:#?}", c3.linearize(input).unwrap())
+}
