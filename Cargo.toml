@@ -1,16 +1,13 @@
-[package]
-name = "c3-linearization"
-version = "0.1.0"
-authors = ["Aster <192607617@qq.com>"]
-description = "C3 linearization"
-repository = "https://github.com/GalAster/c3-linearization"
-readme = "Readme.md"
-license = "MPL-2.0"
-edition = "2018"
+[workspace]
+resolver = "2"
+members = ["projects/*"]
+default-members = [
+    "projects/c3-inheritance",
+]
+exclude = [
+    "projects/.DS_Store",
+]
 
-[dependencies]
-
-[dev-dependencies]
-
-[features]
-default = []
+[profile.release]
+lto = true
+panic = "abort"

@@ -1,0 +1,16 @@
+[package]
+name = "c3-linearization"
+version = "0.1.0"
+authors = ["Aster <192607617@qq.com>"]
+description = "C3 linearization"
+repository = "https://github.com/GalAster/c3-linearization"
+readme = "Readme.md"
+license = "MPL-2.0"
+edition = "2018"
+
+[dependencies]
+
+[dev-dependencies]
+
+[features]
+default = []

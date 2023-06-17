@@ -1,23 +1,31 @@
-C3 Linearization
-================
+Rust Template Project
+=====================
 
-```rust
-use std::collections::HashMap;
-use c3_linearization::C3;
+Rust template project for monorepo
 
-#[test]
-fn basic() {
-    let c3 = C3::default();
-    let mut input = HashMap::new();
-    input.insert('A', vec!['B', 'C']);
-    input.insert('B', vec![]);
-    input.insert('C', vec!['D']);
-    input.insert('D', vec![]);
-    let mut target = HashMap::new();
-    target.insert('A', vec!['A', 'B', 'C', 'D']);
-    target.insert('B', vec!['B']);
-    target.insert('C', vec!['C', 'D']);
-    target.insert('D', vec!['D']);
-    assert_eq!(target, c3.linearize(input).unwrap())
-}
+## Change the initial commit
+
+```shell
+git commit --amend --message "🎂 Project initialized!" --date "2012-12-12"
 ```
+
+## Emoji Comment
+
+| Emoji  | Meaning                      |  
+|--------|------------------------------|  
+| 🎂     | Project initialized!         |  
+| 🎉     | Release new version          |  
+| 🧪🔮   | Experimental code            |   
+| 🔧🐛🐞 | Bug fix                      |  
+| 🔒     | Security fix                 |  
+| 🐣🐤🐥 | Add feature                  |  
+| 📝🎀   | Documentation                |  
+| 🚀     | Performance improve!         |  
+| 🚧     | Work in progress             |  
+| 🚨     | Test coverage improve!       |  
+| 🚥     | CI improve!                  |  
+| 🔥🧨   | Remove code or files         |
+| 🧹     | Code refactor                |
+| 📈     | Add analytics or branch code |
+| 🤖     | Automation fix               |
+| 📦     | Update dependencies          |
