@@ -1,4 +1,4 @@
-use crate::{errors::LinearizeError::{BadHead, Circular, NotFound}, Result, C3, C3Class};
+use crate::{errors::LinearizeError::{BadHead, Circular, NotFound}, Result, C3, ClassStorage};
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
@@ -40,7 +40,7 @@ pub fn merge<T>(sequences: Vec<Vec<T>>) -> Result<Vec<T>>
 }
 
 
-impl C3Class {
+impl ClassStorage {
     pub fn linearize(&self) -> Result<HashMap<T, Vec<T>>>
         where
             T: Clone + PartialEq + Eq + Hash,

@@ -10,5 +10,5 @@ mod traits;
 
 
 pub use crate::errors::{LinearizeError, Result};
-pub use crate::c3::{C3, C3Class};
+pub use crate::c3::{C3, ClassStorage};
 pub use crate::traits::C3Object;
