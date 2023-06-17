@@ -1,4 +1,4 @@
-use c3_inheritance::{C3Object, InheritGraph};
+use c3_inheritance::{C3Object, InheritGraph, LinearizeError};
 use std::collections::{HashMap, HashSet};
 
 #[test]
@@ -16,28 +16,40 @@ fn bad_head() {
     println!("{:#?}", c3.linearize())
 }
 
-//  class O
-//  class A extends O
-//  class B extends O
-//  class C extends O
-//  class D extends O
-//  class E extends O
-//  class K1 extends A, B, C
-//  class K2 extends D, B, E
-//  class K3 extends D, A
-//  class Z extends K1, K2, K3
+/// <https://zh.wikipedia.org/wiki/C3线性化>
 #[test]
-fn basic() {
+fn wiki_1() -> Result<(), LinearizeError> {
     let mut c3 = InheritGraph::default();
-    c3 += "object".as_class().with_inherit("Z");
-    c3 += "A".as_class().with_inherit("object");
-    c3 += "B".as_class().with_inherit("object");
-    c3 += "C".as_class().with_inherit("object");
-    c3 += "D".as_class().with_inherit("object");
-    c3 += "E".as_class().with_inherit("object");
+    c3 += "A";
+    c3 += "B";
+    c3 += "C";
+    c3 += "D";
+    c3 += "E";
     c3 += "K1".as_class().with_inherit("A").with_inherit("B").with_inherit("C");
     c3 += "K2".as_class().with_inherit("D").with_inherit("B").with_inherit("E");
     c3 += "K3".as_class().with_inherit("D").with_inherit("A");
     c3 += "Z".as_class().with_inherit("K1").with_inherit("K2").with_inherit("K3");
-    println!("{:#?}", c3.linearize().unwrap())
+    let out = c3.linearize()?;
+    let z = out.get("Z").unwrap().as_slice();
+    assert_eq!(z, &["Z", "K1", "K2", "K3", "D", "A", "B", "C", "E"]);
+    Ok(())
+}
+
+/// <https://en.wikipedia.org/wiki/C3_linearization>
+#[test]
+fn wiki_2() -> Result<(), LinearizeError> {
+    let mut c3 = InheritGraph::default();
+    c3 += "A";
+    c3 += "B";
+    c3 += "C";
+    c3 += "D";
+    c3 += "E";
+    c3 += "K1".as_class().with_inherit("C").with_inherit("A").with_inherit("B");
+    c3 += "K2".as_class().with_inherit("B").with_inherit("D").with_inherit("E");
+    c3 += "K3".as_class().with_inherit("A").with_inherit("D");
+    c3 += "Z".as_class().with_inherit("K1").with_inherit("K3").with_inherit("K2");
+    let out = c3.linearize()?;
+    let z = out.get("Z").unwrap().as_slice();
+    assert_eq!(z, &["Z", "K1", "C", "K3", "A", "K2", "B", "D", "E"]);
+    Ok(())
 }

@@ -1,13 +1,9 @@
 mod algorithm;
 
-use crate::{
-    errors::LinearizeError::{BadHead, Circular, NotFound},
-    C3Object, LinearizeResult,
-};
+use crate::{C3Object, LinearizeResult};
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::BTreeMap,
     ops::{Add, AddAssign},
-    sync::Arc,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -15,6 +11,7 @@ pub struct C3Progress {
     python: bool,
 }
 
+/// The inheritance graph.
 #[derive(Clone, Debug, Default)]
 pub struct InheritGraph {
     base: BTreeMap<String, C3Class>,
