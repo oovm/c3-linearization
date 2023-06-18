@@ -29,6 +29,12 @@ where
     }
 }
 
+impl<'a> InheritLinearized<'a> {
+    pub fn get(&self, name: &str) -> LinearizeResult<&[&str]> {
+        self.maps.get(name).map(|v| &v[..]).ok_or_else(|| LinearizeError::NotFound { base: name.to_string() })
+    }
+}
+
 /// A class.
 #[derive(Clone, Debug)]
 pub struct C3Class {
@@ -82,8 +88,21 @@ pub struct VirtualInherit {
     class: String,
     is_virtual: bool,
 }
+
 /// A trait for objects that can be used in the C3 algorithm.
 #[derive(Clone, Debug)]
 pub struct C3ClassMember {
     name: String,
+    overloads: usize,
+}
+
+pub enum MemberKind {
+    /// nothing
+    Inherit,
+    /// virtual method,
+    Virtual,
+    /// override method,
+    Override,
+    /// final method
+    Final,
 }
